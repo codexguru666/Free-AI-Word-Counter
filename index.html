@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Free AI Word Counter 📝</title>
+<style>
+  /* Reset and base */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin:0; padding:0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f7f4ff, #e0f0ff);
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  a {
+    color: #7b61ff;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  header {
+    background: #7b61ff;
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(123,97,255,0.3);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  header .logo {
+    font-size: 1.5rem;
+    font-weight: 900;
+    user-select: none;
+  }
+  header nav a {
+    margin-left: 1.6rem;
+    font-size: 1rem;
+    color: white; /* changed from #7b61ff to white */
+  }
+  header nav a:hover {
+    text-decoration: underline;
+  }
+  main {
+    flex: 1;
+    max-width: 900px;
+    margin: 2rem auto 4rem;
+    width: 90%;
+  }
+  /* Ad containers */
+  .ad-container {
+    max-width: 900px;
+    margin: 1.5rem auto;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* Textarea */
+  textarea#inputText {
+    width: 100%;
+    min-height: 180px;
+    font-size: 1.1rem;
+    padding: 1rem 1.2rem;
+    border: 2px solid #7b61ff;
+    border-radius: 12px;
+    resize: vertical;
+    background: #fefaff;
+    box-shadow: inset 0 2px 6px rgba(123,97,255,0.15);
+    transition: border-color 0.3s ease;
+  }
+  textarea#inputText:focus {
+    outline: none;
+    border-color: #9e82ff;
+    box-shadow: 0 0 6px #9e82ff;
+    background: #fff;
+  }
+
+  /* Stats Table */
+  .stats-table-container {
+    margin-top: 1.8rem;
+    overflow-x: auto;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(123,97,255,0.3);
+    background: white;
+  }
+  table.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1rem;
+  }
+  table.stats-table thead {
+    background: linear-gradient(90deg, #7b61ff, #af8fff);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  table.stats-table thead th {
+    padding: 0.8rem 1rem;
+    text-align: left;
+    font-weight: 700;
+  }
+  table.stats-table tbody tr:nth-child(even) {
+    background: #f9f8ff;
+  }
+  table.stats-table tbody td {
+    padding: 0.7rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #6a4fff;
+  }
+
+  /* Buttons */
+  .actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+  }
+  button {
+    background: #7b61ff;
+    border: none;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0.65rem 1.6rem;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: background 0.3s ease;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  button:hover {
+    background: #5f49cc;
+  }
+
+  /* Section Titles */
+  h2.section-title {
+    margin-top: 4rem;
+    margin-bottom: 1rem;
+    color: #5a3fff;
+    font-size: 1.8rem;
+    font-weight: 900;
+    border-left: 6px solid #7b61ff;
+    padding-left: 12px;
+  }
+
+  /* Testimonials */
+  .testimonials {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .testimonial-card {
+    background: #faf8ff;
+    border-radius: 14px;
+    box-shadow: 0 5px 15px rgba(123,97,255,0.2);
+    padding: 1.2rem 1.4rem;
+    flex: 1 1 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: #4c3c99;
+    text-align: center;
+  }
+  .testimonial-emoji {
+    font-size: 3rem;
+  }
+  .testimonial-text {
+    font-style: italic;
+    font-size: 1.05rem;
+  }
+  .testimonial-author {
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  /* FAQ */
+  .faqs {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(250px, 1fr));
+    gap: 1.2rem;
+  }
+  .faq-card {
+    background: white;
+    border-radius: 14px;
+    padding: 1rem 1.2rem;
+    box-shadow: 0 3px 10px rgba(123,97,255,0.15);
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+    user-select: none;
+  }
+  .faq-card:hover {
+    box-shadow: 0 8px 25px rgba(123,97,255,0.3);
+  }
+  .faq-question {
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 0.4rem;
+    color: #622fff;
+  }
+  .faq-answer {
+    font-size: 0.92rem;
+    color: #4c3999;
+    display: none;
+  }
+  .faq-card.open .faq-answer {
+    display: block;
+    margin-top: 0.5rem;
+    font-style: normal;
+  }
+
+  /* Footer */
+  footer {
+    background: #7b61ff;
+    color: white;
+    text-align: center;
+    padding: 1.5rem 2rem;
+    font-size: 0.9rem;
+    user-select: none;
+  }
+  footer a {
+    color: #d9ccff;
+    margin: 0 0.5rem;
+  }
+  footer a:hover {
+    color: #fff;
+  }
+
+  /* Responsive tweaks */
+  @media (max-width: 640px) {
+    .testimonials {
+      flex-direction: column;
+    }
+  }
+</style>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>" />
+</head>
+<body>
+<header>
+  <div class="logo" title="Free AI Word Counter">✍️ Free AI Word Counter</div>
+  <nav>
+    <a href="#" title="Home">🏠 Home</a>
+    <a href="#" title="Word Counter">🔢 Word Counter</a>
+    <a href="#" title="Privacy Policy">🛡️ Privacy</a>
+  </nav>
+</header>
+
+<!-- Top ad -->
+<div class="ad-container" id="top-ad">
+  <script type="text/javascript">
+  	atOptions = {
+  		'key' : '9e444108ce409887f1051df7ffb512e8',
+  		'format' : 'iframe',
+  		'height' : 90,
+  		'width' : 728,
+  		'params' : {}
+  	};
+  </script>
+  <script type="text/javascript" src="//www.highperformanceformat.com/9e444108ce409887f1051df7ffb512e8/invoke.js"></script>
+</div>
+
+<main>
+  <section aria-label="Word counter tool">
+    <textarea id="inputText" placeholder="Paste or type your text here... 💬"></textarea>
+    <div class="stats-table-container" role="region" aria-live="polite" aria-relevant="additions removals">
+      <table class="stats-table" aria-describedby="table-desc" tabindex="0">
+        <caption id="table-desc" class="sr-only">Word count details including words, characters, sentences, and estimated reading times</caption>
+        <thead>
+          <tr>
+            <th scope="col">📊 Words</th>
+            <th scope="col">🔡 Characters</th>
+            <th scope="col">🗨️ Sentences</th>
+            <th scope="col">📄 Paragraphs</th>
+            <th scope="col">📚 Reading Level</th>
+            <th scope="col">⏱️ Reading Time (sec)</th>
+            <th scope="col">🗣️ Speaking Time (sec)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td id="wordCount">0</td>
+            <td id="charCount">0</td>
+            <td id="sentenceCount">0</td>
+            <td id="paragraphCount">0</td>
+            <td id="readingLevel">N/A</td>
+            <td id="readingTime">0</td>
+            <td id="speakingTime">0</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="actions" role="region" aria-label="Actions">
+      <button id="copyBtn" title="Copy text to clipboard">📋 Copy</button>
+      <button id="downloadBtn" title="Download text as file">⬇️ Download</button>
+    </div>
+  </section>
+
+  <!-- Middle ad -->
+  <div class="ad-container" id="middle-ad" style="margin-top:3rem;">
+    <script type="text/javascript">
+    	atOptions = {
+    		'key' : '9e444108ce409887f1051df7ffb512e8',
+    		'format' : 'iframe',
+    		'height' : 90,
+    		'width' : 728,
+    		'params' : {}
+    	};
+    </script>
+    <script type="text/javascript" src="//www.highperformanceformat.com/9e444108ce409887f1051df7ffb512e8/invoke.js"></script>
+  </div>
+
+  <section aria-label="Testimonials">
+    <h2 class="section-title">🌟 Testimonials</h2>
+    <div class="testimonials">
+      <article class="testimonial-card" tabindex="0">
+        <div class="testimonial-emoji">🤖</div>
+        <div class="testimonial-text">I love how this tool quickly shows me detailed insights about my writing! So helpful and colorful.</div>
+        <div class="testimonial-author">- Alex</div>
+      </article>
+      <article class="testimonial-card" tabindex="0">
+        <div class="testimonial-emoji">📝</div>
+        <div class="testimonial-text">Simple, easy to use, and packed with useful info. The copy and download buttons are lifesavers!</div>
+        <div class="testimonial-author">- Priya</div>
+      </article>
+      <article class="testimonial-card" tabindex="0">
+        <div class="testimonial-emoji">🎉</div>
+        <div class="testimonial-text">Beautiful design and accurate stats. I use it every day for my blogging and writing tasks.</div>
+        <div class="testimonial-author">- Carlos</div>
+      </article>
+    </div>
+  </section>
+
+  <section aria-label="Frequently asked questions">
+    <h2 class="section-title">❓ FAQs</h2>
+    <div class="faqs" role="list">
+      <div class="faq-card" tabindex="0" role="listitem" aria-expanded="false">
+        <div class="faq-question">What is this tool for?</div>
+        <div class="faq-answer">It helps you count words, characters, sentences, and paragraphs quickly, plus estimated reading and speaking times.</div>
+      </div>
+      <div class="faq-card" tabindex="0" role="listitem" aria-expanded="false">
+        <div class="faq-question">How accurate is the word count?</div>
+        <div class="faq-answer">Very accurate for general text. It counts based on spaces and punctuation marks.</div>
+      </div>
+      <div class="faq-card" tabindex="0" role="listitem" aria-expanded="false">
+        <div class="faq-question">Can I download my text?</div>
+        <div class="faq-answer">Yes! Use the download button to save the current text as a plain .txt file.</div>
+      </div>
+      <div class="faq-card" tabindex="0" role="listitem" aria-expanded="false">
+        <div class="faq-question">Is my data saved?</div>
+        <div class="faq-answer">No. This tool processes everything locally in your browser and does not save or send the text anywhere.</div>
+      </div>
+      <div class="faq-card" tabindex="0" role="listitem" aria-expanded="false">
+        <div class="faq-question">Are there any ads?</div>
+        <div class="faq-answer">Yes, there are some ad spaces to help maintain this free service.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bottom ad -->
+  <div class="ad-container" id="bottom-ad" style="margin-top:3rem;">
+    <script type="text/javascript">
+    	atOptions = {
+    		'key' : '9e444108ce409887f1051df7ffb512e8',
+    		'format' : 'iframe',
+    		'height' : 90,
+    		'width' : 728,
+    		'params' : {}
+    	};
+    </script>
+    <script type="text/javascript" src="//www.highperformanceformat.com/9e444108ce409887f1051df7ffb512e8/invoke.js"></script>
+  </div>
+</main>
+
+<!-- Last ad -->
+<div class="ad-container" id="last-ad" style="margin-bottom: 2rem;">
+  <script type="text/javascript">
+  	atOptions = {
+  		'key' : '9e444108ce409887f1051df7ffb512e8',
+  		'format' : 'iframe',
+  		'height' : 90,
+  		'width' : 728,
+  		'params' : {}
+  	};
+  </script>
+  <script type="text/javascript" src="//www.highperformanceformat.com/9e444108ce409887f1051df7ffb512e8/invoke.js"></script>
+</div>
+
+<footer>
+  &copy; 2024 Free AI Word Counter | 
+  <a href="#" title="Home">Home</a> | 
+  <a href="#" title="Word Counter">Word Counter</a> | 
+  <a href="#" title="Privacy Policy">Privacy</a>
+</footer>
+
+<script>
+  // FAQ toggle
+  document.querySelectorAll('.faq-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const expanded = card.getAttribute('aria-expanded') === 'true';
+      card.setAttribute('aria-expanded', !expanded);
+      card.classList.toggle('open');
+    });
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        card.click();
+      }
+    });
+  });
+
+  // Text analysis function
+  function analyzeText(text) {
+    // Clean text
+    const trimmedText = text.trim();
+
+    // Words (split by whitespace + exclude empty)
+    const wordsArray = trimmedText.match(/\b\w+('\w+)?\b/g) || [];
+    const wordCount = wordsArray.length;
+
+    // Characters including spaces
+    const charCount = text.length;
+
+    // Sentences - count punctuation that ends sentences . ! ? and ellipsis …
+    const sentencesArray = trimmedText.match(/[^\.!\?]+[\.!\?]+/g) || [];
+    const sentenceCount = sentencesArray.length || (wordCount > 0 ? 1 : 0);
+
+    // Paragraphs - split by new lines or double new lines excluding empty lines
+    const paragraphsArray = trimmedText.split(/\n+/).filter(p => p.trim().length > 0);
+    const paragraphCount = paragraphsArray.length;
+
+    // Reading level N/A per instruction
+    const readingLevel = 'N/A';
+
+    // Reading time in seconds (average reading speed ~ 200 WPM)
+    const readingTimeSec = Math.ceil((wordCount / 200) * 60);
+
+    // Speaking time in seconds (average speaking speed ~ 130 WPM)
+    const speakingTimeSec = Math.ceil((wordCount / 130) * 60);
+
+    return {
+      wordCount, charCount, sentenceCount, paragraphCount,
+      readingLevel, readingTimeSec, speakingTimeSec
+    };
+  }
+
+  const input = document.getElementById('inputText');
+  const wordCountEl = document.getElementById('wordCount');
+  const charCountEl = document.getElementById('charCount');
+  const sentenceCountEl = document.getElementById('sentenceCount');
+  const paragraphCountEl = document.getElementById('paragraphCount');
+  const readingLevelEl = document.getElementById('readingLevel');
+  const readingTimeEl = document.getElementById('readingTime');
+  const speakingTimeEl = document.getElementById('speakingTime');
+
+  function updateStats() {
+    const text = input.value;
+    const stats = analyzeText(text);
+    
+    wordCountEl.textContent = stats.wordCount;
+    charCountEl.textContent = stats.charCount;
+    sentenceCountEl.textContent = stats.sentenceCount;
+    paragraphCountEl.textContent = stats.paragraphCount;
+    readingLevelEl.textContent = stats.readingLevel;
+    readingTimeEl.textContent = stats.readingTimeSec;
+    speakingTimeEl.textContent = stats.speakingTimeSec;
+  }
+
+  input.addEventListener('input', updateStats);
+
+  // Buttons logic
+  document.getElementById('copyBtn').addEventListener('click', () => {
+    if (!input.value.trim()) {
+      alert('Please enter some text to copy! 📋');
+      return;
+    }
+    navigator.clipboard.writeText(input.value).then(() => {
+      alert('Text copied to clipboard! 📋');
+    }).catch(() => {
+      alert('Could not copy the text. Please try manually.');
+    });
+  });
+
+  document.getElementById('downloadBtn').addEventListener('click', () => {
+    if (!input.value.trim()) {
+      alert('Please enter some text to download! ⬇️');
+      return;
+    }
+    const blob = new Blob([input.value], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const filename = 'text-' + new Date().toISOString().slice(0,10) + '.txt';
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 0);
+  });
+
+  // Initial update (empty)
+  updateStats();
+
+</script>
+</body>
+</html>
+
+
